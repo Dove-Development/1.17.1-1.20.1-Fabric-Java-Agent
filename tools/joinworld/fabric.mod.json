@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "id": "dove-test-join",
+  "version": "1.0.0",
+  "name": "Dove test join (mcrun.py only)",
+  "environment": "client",
+  "entrypoints": {
+    "client": ["dev.dove.testjoin.JoinWorld"]
+  }
+}
