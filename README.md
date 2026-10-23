@@ -44,6 +44,23 @@ still, 87.8 vs 86.2 turning) and opened a world saved by an older version correc
   FPS Boost the time is in the graphics driver, without it in Minecraft's own rendering, which is
   Sodium's job rather than an agent's. Not A/B'd again here, to keep testing short.
 
+## Hybrid CPUs
+
+On Windows, on CPUs whose cores are not all alike, the agent (`hooks/HybridCpu`) runs the game at
+Above Normal priority, asks Windows not to run it in efficiency mode (EcoQoS), and keeps the render
+thread on the fast cores (any of them; it is never pinned to one core):
+
+- Intel with performance and efficiency cores (12th generation and later): the performance cores,
+  read from Windows (`GetSystemCpuSetInformation`).
+- AMD Ryzen X3D with one 3D V-Cache CCD (7900X3D, 7950X3D, 9900X3D, 9950X3D): the cores sharing the
+  larger L3 cache, read from Windows (`GetLogicalProcessorInformationEx`). AMD's driver moves only
+  games it recognises onto that CCD, and it often doesn't recognise Minecraft.
+
+It does nothing on CPUs whose cores are all alike (including Ryzens with two equal CCDs), where the
+same settings measured no gain, nor on Linux or macOS. A setting Windows refuses is logged and left
+out. Tested on a CPU without either (detection, and every Windows call with `hybridCpu=force`), and
+with the cache layouts of a 7950X3D and a 7950X; the gain on those CPUs has not been measured yet.
+
 ## Building
 
 Requires nothing but a JDK to run Gradle; the build downloads a JDK 25 toolchain if one isn't installed.
@@ -73,6 +90,7 @@ Agent options (comma-separated after `=`):
 | `fastStartup` | `true`                  | `false` turns off the startup changes         |
 | `timer` | `false`                       | `true` asks Windows for a 1 ms timer          |
 | `renderPriority` | `false`              | `true` raises the render thread's priority    |
+| `hybridCpu` | `auto` | `auto`: only on Windows with performance and efficiency cores (Intel 12th generation and later) or with one 3D V-Cache CCD (Ryzen 7900X3D, 7950X3D, 9900X3D, 9950X3D), the game runs at Above Normal priority, out of efficiency mode (EcoQoS), with the render thread on the fast cores; other CPUs are left alone. `off` turns it off; `force` applies it on any CPU, for testing |
 
 ## Testing tools
 

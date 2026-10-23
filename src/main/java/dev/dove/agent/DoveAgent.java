@@ -1,6 +1,7 @@
 package dev.dove.agent;
 
 import dev.dove.agent.boot.BootClasses;
+import dev.dove.agent.hooks.HybridCpu;
 import dev.dove.agent.hooks.JarFileSystemHooks;
 import dev.dove.agent.hooks.WindowsRuntime;
 import dev.dove.agent.patches.fabric.JarFileSystemPatch;
@@ -60,6 +61,9 @@ public final class DoveAgent {
                 WindowsRuntime.apply("render thread priority above normal", WindowsRuntime::raiseThreadPriority);
             }
         }
+
+        // Also premain's thread: the render thread on every version.
+        HybridCpu.apply(options.hybridCpu());
 
         PatchRegistry registry = new PatchRegistry();
         registerPatches(registry);
